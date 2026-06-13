@@ -4,6 +4,7 @@ Proyecto **Laravel 12 + Vue 3 (Vite)** con **JWT**, **Spatie Laravel Permission*
 
 **Módulo implementado:** Alertas Clínicas Básicas (Módulo #18)
 **Estudiante:** [Tu nombre]
+**Versión:** 3.0 — Sprint 3 completado (Diagramas UML incluidos)
 **Repositorio fork basado en:** https://github.com/rortizs/project_final_analisis_sistemas_Uno.git
 
 ---
