@@ -1,6 +1,10 @@
-# Proyecto base — Evaluación Final Análisis de Sistemas I
+# Sistema de Alertas Clínicas Básicas — Evaluación Final Análisis de Sistemas I
 
-Proyecto **Laravel 12 + Vue 3 (Vite)** con **JWT**, **Spatie Laravel Permission** y **Stancl Tenancy** (tenant identificado por cabecera `X-Tenant-ID`). Esta base se entrega para que el estudiante analice la estructura existente y desarrolle el módulo asignado por el docente.
+Proyecto **Laravel 12 + Vue 3 (Vite)** con **JWT**, **Spatie Laravel Permission** y **Stancl Tenancy** (tenant identificado por cabecera `X-Tenant-ID`).
+
+**Módulo implementado:** Alertas Clínicas Básicas (Módulo #18)
+**Estudiante:** [Tu nombre]
+**Repositorio fork basado en:** https://github.com/rortizs/project_final_analisis_sistemas_Uno.git
 
 ---
 
@@ -128,6 +132,122 @@ php artisan config:clear
 npm run build
 php artisan test
 ```
+
+---
+
+## Módulo Implementado: Alertas Clínicas Básicas
+
+### Descripción
+
+El módulo **Alertas Clínicas Básicas** permite registrar valores clínicos de pacientes y visualizar alertas visuales cuando dichos valores se encuentran fuera de los rangos normales. Soporta 7 parámetros clínicos con evaluación automática de severidad.
+
+### Parámetros clínicos soportados
+
+| Parámetro | Unidad | Rango normal | Alerta baja | Alerta alta | Crítico |
+|-----------|--------|-------------|-------------|-------------|---------|
+| Temperatura Corporal | °C | 36.1 – 37.2 | 35.0 – 36.0 | 37.3 – 38.5 | < 35.0 o > 38.5 |
+| Presión Arterial Sistólica | mmHg | 90 – 120 | 80 – 89 | 121 – 140 | < 80 o > 140 |
+| Presión Arterial Diastólica | mmHg | 60 – 80 | 50 – 59 | 81 – 90 | < 50 o > 90 |
+| Frecuencia Cardíaca | lpm | 60 – 100 | 50 – 59 | 101 – 120 | < 50 o > 120 |
+| Frecuencia Respiratoria | rpm | 12 – 20 | 10 – 11 | 21 – 25 | < 10 o > 25 |
+| Saturación de Oxígeno | % | 95 – 100 | 90 – 94 | 85 – 89 | < 85 |
+| Glucosa en Ayuno | mg/dL | 70 – 100 | 60 – 69 | 101 – 126 | < 60 o > 126 |
+
+### Niveles de severidad y colores
+
+| Severidad | Color | Significado |
+|-----------|-------|-------------|
+| `normal` | Verde | Valor dentro de rango |
+| `warning_low` | Amarillo | Ligeramente bajo |
+| `warning_high` | Naranja | Ligeramente alto |
+| `critical` | Rojo (con animación) | Requiere atención inmediata |
+
+### API — Endpoints del módulo
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/patients` | Listar pacientes |
+| POST | `/patients` | Crear paciente |
+| GET | `/clinical-records` | Listar registros clínicos (filtros: patient_id, record_type, severity, from, to) |
+| POST | `/clinical-records` | Crear registro clínico (evalúa alerta automáticamente) |
+| GET | `/clinical-records/alerts/summary` | Resumen de alertas activas por severidad |
+| GET | `/clinical-records/alerts/active` | Lista de alertas activas |
+| GET | `/clinical-ranges` | Listar rangos clínicos configurados |
+
+### Frontend — Rutas del módulo
+
+| Ruta | Página | Descripción |
+|------|--------|-------------|
+| `/clinical-alerts` | ClinicalAlertsPage | Listado de registros con filtros, tabla y resumen de alertas |
+| `/clinical-alerts/create` | CreateRecordPage | Formulario para nuevo registro clínico |
+| `/clinical-alerts/patient/:id` | PatientDetailPage | Historial clínico del paciente con timeline |
+
+### Estructura del módulo
+
+```
+resources/js/modules/clinical-alerts/
+├── components/
+│   ├── AlertSummaryCard.vue        # Tarjetas resumen de alertas
+│   ├── ClinicalValueBadge.vue      # Badge con color según severidad
+│   └── ToastNotification.vue       # Notificaciones toast animadas
+├── pages/
+│   ├── ClinicalAlertsPage.vue      # Página principal
+│   ├── CreateRecordPage.vue        # Formulario de registro
+│   └── PatientDetailPage.vue       # Historial del paciente
+└── stores/
+    └── clinicalAlerts.js           # Store Pinia
+
+app/
+├── Http/Controllers/Api/V1/
+│   └── ClinicalAlertController.php # Controlador con 7 endpoints
+├── Models/
+│   ├── Patient.php                 # Modelo de paciente
+│   ├── ClinicalRecord.php          # Modelo de registro clínico
+│   └── ClinicalRange.php           # Modelo de rango con método evaluate()
+└── Services/
+    └── ClinicalAlertService.php    # Lógica de evaluación de alertas
+
+database/
+├── migrations/
+│   ├── 2026_06_13_080514_create_patients_table.php
+│   ├── 2026_06_13_080515_create_clinical_ranges_table.php
+│   └── 2026_06_13_080516_create_clinical_records_table.php
+└── seeders/
+    └── ClinicalRangeSeeder.php     # 7 rangos por defecto
+```
+
+### Commits principales
+
+| Sprint | Mensaje |
+|--------|---------|
+| 1 | `feat: implement clinical alerts module with alert detection system` |
+| 2 | `feat: enhance clinical alerts module with toasts, tests, and patient detail` |
+| 3 | `docs: add UML diagrams for clinical alerts module` |
+
+### Cómo probar el módulo
+
+1. Iniciar servidores:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+2. Ir a `http://localhost:5173/clinical-alerts`
+
+3. Ingresar con credenciales de prueba:
+   - Tenant ID: `00000000-0000-4000-8000-000000000001`
+   - Email: `admin@hospital.com` / `medico@hospital.com` / `enfermera@hospital.com`
+   - Contraseña: `password`
+
+4. Crear un paciente y luego registrar valores clínicos para ver las alertas en acción.
+
+### Ejecutar tests
+
+```bash
+php artisan test
+```
+
+Incluye 13 tests unitarios para la lógica de evaluación de rangos clínicos.
 
 ---
 
